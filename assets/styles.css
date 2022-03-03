@@ -1,0 +1,47 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
+
+.sporesbar {
+    margin-bottom: 20px;
+}
+
+.sporescontainer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.tabbedcontainer .tab-content {
+    border-bottom: 1px solid #dee2e6;
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    border-bottom-left-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.slider-group {
+    padding-bottom: 5px;
+}
+
+.slider-label {
+    font-size: 0.8em;
+}
+
+.slider-label label {
+    margin-top: -5px;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+}
+
+#overview-image {max-width: 100%;}
+
+.rc-slider-track {background-color: #0d6efd;}
+.rc-slider-handle {border-color: #0d6efd;}
+.rc-slider-dot-active {border-color: #0d6efd;}
+
+.rc-slider-handle:hover {border-color: #1a334c;}
+
+.rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging {
+    border-color: #1a334c;
+    box-shadow: 0 0 0 5px #e0e0e0;}
+.rc-slider-handle-click-focused:focus {border-color: #0d6efd;}
