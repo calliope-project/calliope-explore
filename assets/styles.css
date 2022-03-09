@@ -45,3 +45,9 @@
     border-color: #1a334c;
     box-shadow: 0 0 0 5px #e0e0e0;}
 .rc-slider-handle-click-focused:focus {border-color: #0d6efd;}
+
+.buttons {margin-bottom: 15px;}
+
+.buttons button {
+    margin-right: 5px;
+}

@@ -1,12 +1,13 @@
 from urllib.parse import urlencode, quote
+import json
 
 import flask
+import dash
 from dash import Dash, dcc, html, Input, Output
+from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
-
-from data import spore_id_from_clickdata
 
 from url_helpers import (
     apply_default_value,
@@ -72,6 +73,25 @@ def row_label(params, label, id):
 def controls(params):
     return html.Div(
         [
+            dbc.Row(
+                dbc.Col(
+                    [
+                        dbc.Button(
+                            "Reset sliders",
+                            color="primary",
+                            id="reset-sliders",
+                            outline=True,
+                        ),
+                        dbc.Button(
+                            "Deselect SPORE",
+                            color="primary",
+                            id="reset-spore",
+                            outline=True,
+                        ),
+                    ]
+                ),
+                class_name="buttons",
+            ),
             row_label(
                 params=params, label="Transport electrification", id="slider-transport"
             ),
@@ -110,6 +130,7 @@ def page_layout(params=None):
     layout = html.Div(
         [
             navbar,
+            apply_default_value(params)(dcc.Store)(id="spore-id"),
             dbc.Container(
                 [
                     dbc.Row(
@@ -138,10 +159,9 @@ def page_layout(params=None):
 
 @app.callback(
     Output("overview-image", "src"),
-    Input("spores-scatter", "clickData"),
+    Input("spore-id", "data"),
 )
-def update_tabs(clickData):
-    spore_id = spore_id_from_clickdata(clickData)
+def update_tabs(spore_id):
     if spore_id is None:
         return "assets/img/empty.jpg"
     else:
@@ -150,14 +170,42 @@ def update_tabs(clickData):
 
 @app.callback(
     Output("spore-data", "children"),
-    Input("spores-scatter", "clickData"),
+    Input("spore-id", "data"),
 )
-def update_flows(clickData):
-    spore_id = spore_id_from_clickdata(clickData)
+def update_flows(spore_id):
     if spore_id is None:
         return None
     else:
         return (f"SPORE id {spore_id}\n\n", df_spores.loc[spore_id, :].to_string())
+
+
+@app.callback(
+    Output("spore-id", "data"),
+    Input("spores-scatter", "clickData"),
+    Input("reset-spore", "n_clicks"),
+    Input("spore-id", "data"),
+)
+def update_spore_id(scatter_clickdata, reset_n_clicks, old_spore_id):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        _id = None
+    else:
+        _id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if _id == "spores-scatter":
+        return scatter_clickdata["points"][0]["customdata"][0]
+    elif _id == "reset-spore":
+        return None
+    elif _id is None:
+        return old_spore_id
+
+    # try:
+    #     return scatter_clickdata["points"][0]["customdata"][0]
+    # # If this was called without an actual valid click, resulting in no valid ClickData,
+    # # we return the URL-persisted spore id
+    # except TypeError:
+    #     return old_spore_id
 
 
 @app.callback(
@@ -239,6 +287,7 @@ def page_load(href):
 
 
 component_ids = {
+    "spore-id": ["data"],
     "slider-transport": ["value"],
     "slider-curtailment": ["value"],
     "slider-biofuel": ["value"],
@@ -247,6 +296,25 @@ component_ids = {
     "slider-fuel-gini": ["value"],
     "slider-ev": ["value"],
 }
+
+
+@app.callback(
+    [
+        Output("slider-transport", "value"),
+        Output("slider-curtailment", "value"),
+        Output("slider-biofuel", "value"),
+        Output("slider-import", "value"),
+        Output("slider-elec-gini", "value"),
+        Output("slider-fuel-gini", "value"),
+        Output("slider-ev", "value"),
+    ],
+    inputs=[Input("reset-sliders", "n_clicks")],
+)
+def reset_sliders(n_clicks):
+    if n_clicks is None:
+        raise PreventUpdate
+    else:
+        return [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
 
 
 @app.callback(

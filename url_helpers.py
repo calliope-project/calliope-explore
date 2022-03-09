@@ -1,3 +1,8 @@
+#
+# Source: https://github.com/plotly/dash/issues/188#issuecomment-602233549
+# Source: https://gist.github.com/eddy-geek/73c8f73c089b0f998a49541b15a694b1
+#
+
 import ast
 import re
 from urllib.parse import urlparse, parse_qsl
