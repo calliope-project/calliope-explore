@@ -55,13 +55,18 @@ navbar = dbc.NavbarSimple(
 )
 
 
-def row_label(params, label, id):
+def row_label(params, label, id, default_marks=False):
+    if default_marks:
+        kwargs = {}
+    else:
+        kwargs = {"marks": {0: "", 0.2: "", 0.4: "", 0.6: "", 0.8: "", 1: ""}}
+
     return dbc.Row(
         [
             dbc.Col(dbc.Label(label), md=3, class_name="slider-label"),
             dbc.Col(
                 apply_default_value(params)(dcc.RangeSlider)(
-                    min=0, max=1, value=[0, 1], id=id
+                    min=0, max=1, value=[0, 1], id=id, **kwargs
                 ),
                 class_name="slider",
             ),
@@ -92,15 +97,20 @@ def controls(params):
                 ),
                 class_name="buttons",
             ),
-            row_label(
-                params=params, label="Transport electrification", id="slider-transport"
-            ),
+            row_label(params=params, label="Storage capacity", id="slider-storage"),
             row_label(params=params, label="Curtailment", id="slider-curtailment"),
             row_label(params=params, label="Biofuel utilisation", id="slider-biofuel"),
             row_label(params=params, label="National import", id="slider-import"),
             row_label(params=params, label="Electricity gini", id="slider-elec-gini"),
             row_label(params=params, label="Fuel autarky", id="slider-fuel-gini"),
             row_label(params=params, label="EV as flexibility", id="slider-ev"),
+            row_label(params=params, label="Heat electrification", id="slider-heat"),
+            row_label(
+                params=params,
+                label="Transport electrification",
+                id="slider-transport",
+                default_marks=True,
+            ),
         ]
     )
 
@@ -210,26 +220,34 @@ def update_spore_id(scatter_clickdata, reset_n_clicks, old_spore_id):
 
 @app.callback(
     Output("spores-scatter", "figure"),
-    Input("slider-transport", "value"),
+    Input("slider-storage", "value"),
     Input("slider-curtailment", "value"),
     Input("slider-biofuel", "value"),
     Input("slider-import", "value"),
     Input("slider-elec-gini", "value"),
     Input("slider-fuel-gini", "value"),
     Input("slider-ev", "value"),
+    Input("slider-heat", "value"),
+    Input("slider-transport", "value"),
 )
 def update_figure(
-    transport_range,
+    storage_range,
     curtailment_range,
     biofuel_range,
     import_range,
     elec_gini_rance,
     fuel_gini_range,
     ev_range,
+    heat_range,
+    transport_range,
 ):
     df_spores_filtered = df_spores[
         df_spores["Transport electrification"].between(
             transport_range[0], transport_range[1]
+        )
+        & df_spores["Heat electrification"].between(heat_range[0], heat_range[1])
+        & df_spores["Storage discharge capacity"].between(
+            storage_range[0], storage_range[1]
         )
         & df_spores["Curtailment"].between(curtailment_range[0], curtailment_range[1])
         & df_spores["Biofuel utilisation"].between(biofuel_range[0], biofuel_range[1])
@@ -243,24 +261,49 @@ def update_figure(
         & df_spores["EV as flexibility"].between(ev_range[0], ev_range[1])
     ]
 
-    fig = px.scatter(
+    COLS = [
+        "Storage discharge capacity",
+        "Curtailment",
+        "Biofuel utilisation",
+        "Average national import",
+        "Electricity production Gini coefficient",
+        "Fuel autarky Gini coefficient",
+        "EV as flexibility",
+        "Heat electrification",
+        "Transport electrification",
+    ]
+    df_spores_filtered = pd.melt(
+        df_spores_filtered.loc[:, COLS], ignore_index=False
+    ).reset_index(drop=False)
+
+    fig = px.strip(
         df_spores_filtered,
-        x="Heat electrification",
-        y="Storage discharge capacity",
-        # size="",
-        # color="",
-        hover_name=df_spores_filtered.index,
-        hover_data={c: False for c in df_spores_filtered.columns},
-        custom_data=[df_spores_filtered.index],
-        size_max=55,
+        x="variable",
+        y="value",
+        custom_data=["id"],
+        hover_name="id",
+        color="variable",
+        # hover_data={c: False for c in df_spores_filtered.columns},
         template="plotly_white",
         height=350,
-        width=350,
-        color_discrete_sequence=["#0d6efd"],
+        color_discrete_sequence=[
+            "#0440fe",
+            "#ff7c02",
+            "#32ce4d",
+            "#e9111c",
+            "#933ae2",
+            "#7f3901",
+            "#f69adb",
+            "#ffd85b",
+            "#58e5fe",
+        ],
     )
+
     fig.update_layout(
+        showlegend=False,
         margin=dict(l=0, r=0, t=0, b=0),
         transition_duration=500,
+        xaxis=dict(showticklabels=False),
     )
 
     return fig
