@@ -283,7 +283,7 @@ def update_figure(
         custom_data=["id"],
         hover_name="id",
         color="variable",
-        # hover_data={c: False for c in df_spores_filtered.columns},
+        hover_data={c: False for c in df_spores_filtered.columns},
         template="plotly_white",
         height=350,
         color_discrete_sequence=[
