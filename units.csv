@@ -1,0 +1,18 @@
+,unit
+Average national import,0-1
+Biofuel utilisation,0-1
+Curtailment,0-1
+EV as flexibility,0-1
+Electricity production Gini coefficient,0-1
+Fuel autarky Gini coefficient,0-1
+Heat electrification,0-1
+Storage discharge capacity,0-1
+Transport electrification,0-1
+Biofuels,TWh
+Hydro,TWh
+Nuclear,TWh
+Offshore wind,TWh
+Onshore wind,TWh
+PV,TWh
+Waste,TWh
+Wind,TWh

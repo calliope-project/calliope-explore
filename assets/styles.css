@@ -57,3 +57,16 @@
 .buttons button {
     margin-right: 5px;
 }
+
+table {
+    border: 0;
+}
+
+th, td {
+    padding: 2px 5px 2px 5px;
+}
+
+tbody tr th {
+    font-weight: normal;
+    text-align: right;
+}

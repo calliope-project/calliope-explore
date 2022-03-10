@@ -1,3 +1,4 @@
+from email.policy import default
 from urllib.parse import urlencode, quote
 import json
 
@@ -5,6 +6,7 @@ import flask
 import dash
 from dash import Dash, dcc, html, Input, Output
 from dash.exceptions import PreventUpdate
+import dash_dangerously_set_inner_html
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -17,6 +19,54 @@ from url_helpers import (
 )
 
 df_spores = pd.read_csv("./spores_data.csv", index_col=0)
+df_units = pd.read_csv("./units.csv", index_col=0)
+
+COLS = {
+    "storage": dict(
+        label="Storage capacity",
+        col="Storage discharge capacity",
+    ),
+    "curtailment": dict(
+        label="Curtailment",
+        col="Curtailment",
+    ),
+    "biofuel": dict(
+        label="Biofuel utilisation",
+        col="Biofuel utilisation",
+    ),
+    "import": dict(
+        label="National import",
+        col="Average national import",
+    ),
+    "elec-gini": dict(
+        label="Electricity gini",
+        col="Electricity production Gini coefficient",
+    ),
+    "fuel-gini": dict(
+        label="Fuel autarky",
+        col="Fuel autarky Gini coefficient",
+    ),
+    "ev": dict(
+        label="EV as flexibility",
+        col="EV as flexibility",
+    ),
+    "heat": dict(
+        label="Heat electrification",
+        col="Heat electrification",
+    ),
+    "transport": dict(
+        label="Transport electrification",
+        col="Transport electrification",
+    ),
+}
+
+COL_NAMES = [v["col"] for k, v in COLS.items()]
+
+SLIDER_DEFAULTS = {
+    col: [df_spores[col].min(), df_spores[col].max()] for col in COL_NAMES
+}
+
+SLIDER_DEFAULTS_LIST = [v for k, v in SLIDER_DEFAULTS.items()]
 
 server = flask.Flask(__name__)
 
@@ -55,18 +105,29 @@ navbar = dbc.NavbarSimple(
 )
 
 
-def row_label(params, label, id, default_marks=False):
+def row_label_from_id(params, id_, default_marks=False):
+    return row_label(
+        params=params,
+        label=COLS[id_]["label"],
+        id=f"slider-{id_}",
+        col=COLS[id_]["col"],
+        default_marks=default_marks,
+    )
+
+
+def row_label(params, label, id, col, default_marks=False):
     if default_marks:
         kwargs = {}
     else:
         kwargs = {"marks": {0: "", 0.2: "", 0.4: "", 0.6: "", 0.8: "", 1: ""}}
 
+    min_, max_ = df_spores[col].min(), df_spores[col].max()
     return dbc.Row(
         [
             dbc.Col(dbc.Label(label), md=3, class_name="slider-label"),
             dbc.Col(
                 apply_default_value(params)(dcc.RangeSlider)(
-                    min=0, max=1, value=[0, 1], id=id, **kwargs
+                    min=0, max=1, value=[min_, max_], id=id, **kwargs
                 ),
                 class_name="slider",
             ),
@@ -97,20 +158,15 @@ def controls(params):
                 ),
                 class_name="buttons",
             ),
-            row_label(params=params, label="Storage capacity", id="slider-storage"),
-            row_label(params=params, label="Curtailment", id="slider-curtailment"),
-            row_label(params=params, label="Biofuel utilisation", id="slider-biofuel"),
-            row_label(params=params, label="National import", id="slider-import"),
-            row_label(params=params, label="Electricity gini", id="slider-elec-gini"),
-            row_label(params=params, label="Fuel autarky", id="slider-fuel-gini"),
-            row_label(params=params, label="EV as flexibility", id="slider-ev"),
-            row_label(params=params, label="Heat electrification", id="slider-heat"),
-            row_label(
-                params=params,
-                label="Transport electrification",
-                id="slider-transport",
-                default_marks=True,
-            ),
+            row_label_from_id(params=params, id_="storage"),
+            row_label_from_id(params=params, id_="curtailment"),
+            row_label_from_id(params=params, id_="biofuel"),
+            row_label_from_id(params=params, id_="import"),
+            row_label_from_id(params=params, id_="elec-gini"),
+            row_label_from_id(params=params, id_="fuel-gini"),
+            row_label_from_id(params=params, id_="ev"),
+            row_label_from_id(params=params, id_="heat"),
+            row_label_from_id(params=params, id_="transport", default_marks=True),
         ]
     )
 
@@ -127,9 +183,9 @@ def page_layout(params=None):
                     tab_id="overview",
                 ),
                 dbc.Tab(
-                    html.Pre(id="spore-data"),
-                    label="Energy flows",
-                    tab_id="flows",
+                    html.Div(id="summary-data"),
+                    label="Summary data",
+                    tab_id="summary",
                 ),
             ],
             id="tabs",
@@ -179,14 +235,18 @@ def update_tabs(spore_id):
 
 
 @app.callback(
-    Output("spore-data", "children"),
+    Output("summary-data", "children"),
     Input("spore-id", "data"),
 )
-def update_flows(spore_id):
+def update_summary(spore_id):
     if spore_id is None:
         return None
     else:
-        return (f"SPORE id {spore_id}\n\n", df_spores.loc[spore_id, :].to_string())
+        df_ = pd.concat([df_spores.loc[spore_id, :], df_units], axis=1)
+        df_.columns = ["Indicator", "Unit"]
+        return dash_dangerously_set_inner_html.DangerouslySetInnerHTML(
+            df_.to_html(float_format=lambda x: "{:.2f}".format(x))
+        )
 
 
 @app.callback(
@@ -261,19 +321,8 @@ def update_figure(
         & df_spores["EV as flexibility"].between(ev_range[0], ev_range[1])
     ]
 
-    COLS = [
-        "Storage discharge capacity",
-        "Curtailment",
-        "Biofuel utilisation",
-        "Average national import",
-        "Electricity production Gini coefficient",
-        "Fuel autarky Gini coefficient",
-        "EV as flexibility",
-        "Heat electrification",
-        "Transport electrification",
-    ]
     df_spores_filtered = pd.melt(
-        df_spores_filtered.loc[:, COLS], ignore_index=False
+        df_spores_filtered.loc[:, COL_NAMES], ignore_index=False
     ).reset_index(drop=False)
 
     fig = px.strip(
@@ -343,21 +392,20 @@ component_ids = {
 
 @app.callback(
     [
-        Output("slider-transport", "value"),
+        Output("slider-storage", "value"),
         Output("slider-curtailment", "value"),
         Output("slider-biofuel", "value"),
         Output("slider-import", "value"),
         Output("slider-elec-gini", "value"),
         Output("slider-fuel-gini", "value"),
         Output("slider-ev", "value"),
+        Output("slider-heat", "value"),
+        Output("slider-transport", "value"),
     ],
     inputs=[Input("reset-sliders", "n_clicks")],
 )
 def reset_sliders(n_clicks):
-    if n_clicks is None:
-        raise PreventUpdate
-    else:
-        return [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
+    return SLIDER_DEFAULTS_LIST
 
 
 @app.callback(
