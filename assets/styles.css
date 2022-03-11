@@ -70,3 +70,22 @@ tbody tr th {
     font-weight: normal;
     text-align: right;
 }
+
+#help {
+    border: 1px solid #0d6efd;
+    border-radius: .25rem;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+}
+
+#help summary {
+    color: #0d6efd;
+}
+
+#help p {
+    color: #686868;
+}
+
+#help summary + p {
+    padding-top: 20px;
+}

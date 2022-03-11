@@ -1,22 +1,14 @@
-from email.policy import default
-from urllib.parse import urlencode, quote
-import json
-
-import flask
 import dash
-from dash import Dash, dcc, html, Input, Output
-from dash.exceptions import PreventUpdate
-import dash_dangerously_set_inner_html
 import dash_bootstrap_components as dbc
-import plotly.express as px
+import dash_dangerously_set_inner_html
+import flask
 import pandas as pd
+import plotly.express as px
+from dash import Dash, Input, Output, dcc, html
+from dash.exceptions import PreventUpdate
 
-from url_helpers import (
-    apply_default_value,
-    parse_state,
-    param_string,
-    myrepr,
-)
+import url_helpers
+
 
 df_spores = pd.read_csv("./spores_data.csv", index_col=0)
 df_units = pd.read_csv("./units.csv", index_col=0)
@@ -25,38 +17,47 @@ COLS = {
     "storage": dict(
         label="Storage capacity",
         col="Storage discharge capacity",
+        help_text="foobar",
     ),
     "curtailment": dict(
         label="Curtailment",
         col="Curtailment",
+        help_text="foobar",
     ),
     "biofuel": dict(
         label="Biofuel utilisation",
         col="Biofuel utilisation",
+        help_text="foobar",
     ),
     "import": dict(
         label="National import",
         col="Average national import",
+        help_text="foobar",
     ),
     "elec-gini": dict(
         label="Electricity gini",
         col="Electricity production Gini coefficient",
+        help_text="foobar",
     ),
     "fuel-gini": dict(
         label="Fuel autarky",
         col="Fuel autarky Gini coefficient",
+        help_text="foobar",
     ),
     "ev": dict(
         label="EV as flexibility",
         col="EV as flexibility",
+        help_text="foobar",
     ),
     "heat": dict(
         label="Heat electrification",
         col="Heat electrification",
+        help_text="foobar",
     ),
     "transport": dict(
         label="Transport electrification",
         col="Transport electrification",
+        help_text="foobar",
     ),
 }
 
@@ -67,6 +68,19 @@ SLIDER_DEFAULTS = {
 }
 
 SLIDER_DEFAULTS_LIST = [v for k, v in SLIDER_DEFAULTS.items()]
+
+COMPONENT_IDS = {
+    "spore-id": ["data"],
+    "slider-storage": ["value"],
+    "slider-curtailment": ["value"],
+    "slider-biofuel": ["value"],
+    "slider-import": ["value"],
+    "slider-elec-gini": ["value"],
+    "slider-fuel-gini": ["value"],
+    "slider-ev": ["value"],
+    "slider-heat": ["value"],
+    "slider-transport": ["value"],
+}
 
 server = flask.Flask(__name__)
 
@@ -111,11 +125,12 @@ def row_label_from_id(params, id_, default_marks=False):
         label=COLS[id_]["label"],
         id=f"slider-{id_}",
         col=COLS[id_]["col"],
+        help_text=COLS[id_]["help_text"],
         default_marks=default_marks,
     )
 
 
-def row_label(params, label, id, col, default_marks=False):
+def row_label(params, label, id, col, help_text, default_marks=False):
     if default_marks:
         kwargs = {}
     else:
@@ -124,9 +139,23 @@ def row_label(params, label, id, col, default_marks=False):
     min_, max_ = df_spores[col].min(), df_spores[col].max()
     return dbc.Row(
         [
-            dbc.Col(dbc.Label(label), md=3, class_name="slider-label"),
             dbc.Col(
-                apply_default_value(params)(dcc.RangeSlider)(
+                [
+                    dbc.Label(
+                        [f"{label} ", html.I(className="bi-info-circle")],
+                        id=f"tgt-{id}",
+                    ),
+                    dbc.Popover(
+                        dbc.PopoverBody(help_text),
+                        target=f"tgt-{id}",
+                        trigger="hover",
+                    ),
+                ],
+                md=4,
+                class_name="slider-label",
+            ),
+            dbc.Col(
+                url_helpers.apply_default_value(params)(dcc.RangeSlider)(
                     min=0, max=1, value=[min_, max_], id=id, **kwargs
                 ),
                 class_name="slider",
@@ -171,10 +200,20 @@ def controls(params):
     )
 
 
+HELP_TEXT = [html.P("Help text paragraph 1"), html.P("Help text paragraph 2")]
+
+
 def page_layout(params=None):
     params = params or {}
 
     results = (
+        html.Details(
+            [
+                html.Summary("Click here to show help"),
+            ]
+            + HELP_TEXT,
+            id="help",
+        ),
         dbc.Tabs(
             [
                 dbc.Tab(
@@ -196,7 +235,7 @@ def page_layout(params=None):
     layout = html.Div(
         [
             navbar,
-            apply_default_value(params)(dcc.Store)(id="spore-id"),
+            url_helpers.apply_default_value(params)(dcc.Store)(id="spore-id"),
             dbc.Container(
                 [
                     dbc.Row(
@@ -374,20 +413,8 @@ app.layout = app_layout
 def page_load(href):
     if not href:
         return []
-    state = parse_state(href)
+    state = url_helpers.parse_state(href)
     return page_layout(state)
-
-
-component_ids = {
-    "spore-id": ["data"],
-    "slider-transport": ["value"],
-    "slider-curtailment": ["value"],
-    "slider-biofuel": ["value"],
-    "slider-import": ["value"],
-    "slider-elec-gini": ["value"],
-    "slider-fuel-gini": ["value"],
-    "slider-ev": ["value"],
-}
 
 
 @app.callback(
@@ -410,15 +437,10 @@ def reset_sliders(n_clicks):
 
 @app.callback(
     Output("url", "search"),
-    inputs=[Input(id, p) for id, param in component_ids.items() for p in param],
+    inputs=[Input(id, p) for id, param in COMPONENT_IDS.items() for p in param],
 )
-def update_url_state(*values):
-    """Updates URL from component values."""
-
-    keys = [param_string(id, p) for id, param in component_ids.items() for p in param]
-    state = dict(zip(keys, map(myrepr, values)))
-    params = urlencode(state, safe="%/:?~#+!$,;'@()*[]\"", quote_via=quote)
-    return f"?{params}"
+def update_url(*values):
+    return url_helpers.update_url_state(COMPONENT_IDS, values)
 
 
 if __name__ == "__main__":

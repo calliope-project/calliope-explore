@@ -17,10 +17,16 @@ pipenv run python app.py
 
 Deploying to an `aarch64` instance running the Ubuntu 20.04 image on Oracle cloud.
 
+Preparation:
+
 ```
 apt install python3 python3-pip supervisor certbot python3-certbot-nginx
 sudo pip3 install pipenv
-cd app
+```
+
+Setup:
+
+```
 pipenv install
 sudo cp config/calliope-explore.conf /etc/supervisor/conf.d/
 sudo supervisorctl reread
@@ -44,3 +50,10 @@ sudo certbot --nginx -d explore.callio.pe
 ```
 
 Everything should now work...
+
+
+# LICENSE
+
+MIT
+
+Includes code Copyright (C) 2022 by Edward O. (see `url_helpers.py`)
