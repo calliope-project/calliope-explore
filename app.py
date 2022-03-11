@@ -17,47 +17,59 @@ COLS = {
     "storage": dict(
         label="Storage capacity",
         col="Storage discharge capacity",
-        help_text="foobar",
+        help_text="Total capacity of all storage technologies to discharge energy in any given hour,"\
+        " including low temperature heat,hydrogen and electricity. Scaled relative to its maximum value"\
+        "(range 0.08 – 11 TW)",
     ),
     "curtailment": dict(
         label="Curtailment",
         col="Curtailment",
-        help_text="foobar",
+        help_text="Percentage of maximum available renewable electricity production"\
+        " from wind and solar photovoltaic technologies that is curtailed"\
+        " Scaled relative to its maximum value (range 0.1 – 6 %)",
     ),
     "biofuel": dict(
         label="Biofuel utilisation",
         col="Biofuel utilisation",
-        help_text="foobar",
+        help_text="Percentage of available residual biofuels that are consumed",
     ),
     "import": dict(
         label="National import",
         col="Average national import",
-        help_text="foobar",
+        help_text="Average annual import of electricity across all countries in the study area."\
+        " Scaled relative to its maximum value (range 4 – 73 TWh)",
     ),
     "elec-gini": dict(
         label="Electricity gini",
         col="Electricity production Gini coefficient",
-        help_text="foobar",
+        help_text="Degree of inequality of spatial distribution of electricity across all model regions,"\
+        " measured by the Gini coefficient of regional electricity production."\
+        " Scaled relative to its maximum value (range 0.53 – 0.74)",
     ),
     "fuel-gini": dict(
         label="Fuel autarky",
         col="Fuel autarky Gini coefficient",
-        help_text="foobar",
+        help_text="Degree of inequality of spatial distribution of industry"\
+        " synthetic fuel production relative to industry fuel demand across all model regions,"\
+        " measured by the Gini coefficient of regional over-production."\
+        " Scaled relative to its maximum value (0.63 – 0.93)",
     ),
     "ev": dict(
         label="EV as flexibility",
         col="EV as flexibility",
-        help_text="foobar",
+        help_text="Pearson correlation between timeseries of electric vehicle"\
+        " charging against that of primary electricity supply."\
+        " Scaled relative to its maximum value (0.52 – 0.92)",
     ),
     "heat": dict(
         label="Heat electrification",
         col="Heat electrification",
-        help_text="foobar",
+        help_text="Percentage of heat demand met by electricity-consuming, heat-producing technologies",
     ),
     "transport": dict(
         label="Transport electrification",
         col="Transport electrification",
-        help_text="foobar",
+        help_text="Percentage of road passenger and freight transport demand met by electric vehicles",
     ),
 }
 
@@ -200,7 +212,18 @@ def controls(params):
     )
 
 
-HELP_TEXT = [html.P("Help text paragraph 1"), html.P("Help text paragraph 2")]
+HELP_TEXT = [
+             html.P("The Europe-wide energy system explorer allows you to navigate hundreds of alternative energy system configurations (SPORES)"\
+                    " to reach carbon-neutrality across the entire European energy system in 2050. All such end-point configurations are equally feasible"\
+                    " from a technical perspective and comparable in their total annualised system cost. If you want to know more about how we"\
+                    " generate SPORES, click on 'See the paper' in the top-right corner."), 
+             html.P("How to explore? STEP 1. Use the sliders on the left to filter the SPORES based on practically-relevant indicators."\
+                    " All indicators are scaled to their maximum values to range between 0 and 1. You can hover on the 'info' icon next to"\
+                    " each indicator for a more extended definition and the actual value range. STEP 2. The slider ranges act on the plot in the bottom-left"\
+                    " corner of the interface, which shows those SPORES that match the selected ranges. For default slider ranges, you will see all the SPORES"\
+                    " across each indicator. STEP 3. Click on each of the SPORES in the plot to see it visualised on maps in the 'Overview' panel."\
+                    " You can also click on the 'Summary data' panel for quantitative metrics. For further details on the map contents, you can refer to the paper.")
+            ]
 
 
 def page_layout(params=None):
