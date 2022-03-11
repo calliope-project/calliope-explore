@@ -212,7 +212,18 @@ def controls(params):
     )
 
 
-HELP_TEXT = [html.P("Help text paragraph 1"), html.P("Help text paragraph 2")]
+HELP_TEXT = [
+             html.P("The Europe-wide energy system explorer allows you to navigate hundreds of alternative energy system configurations (SPORES)"\
+                    " to reach carbon-neutrality across the entire European energy system in 2050. All such end-point configurations are equally feasible"\
+                    " from a technical perspective and comparable in terms of total annualised system cost. If you want to know more about how SPORES"\
+                    " are generated, click on 'See the paper' in the top-right corner."), 
+             html.P("How to explore? STEP 1. Use the sliders on the left to filter the SPORES based on practically-relevant indicators."\
+                    " All indicators are scaled to their maximum values, so that they range between 0 and 1. You can click hover on the 'info' icon next to"\
+                    " each indicator for a longer definition and the actual value range. STEP 2. The slider ranges act on the scatter plot in the bottom-left"\
+                    " corner of the interface, which shows those SPORES that match the selected ranges. For default slider ranges, you will see all the SPORES"\
+                    " across each indicator. STEP 3. Click on each of the SPORES in the scatter plot to see it visualised on maps in the 'Overview' panel."\
+                    " You can also click on the 'Summary data' panel for quantitative metrics. For further details on the map contents, you can refer to the paper.")
+            ]
 
 
 def page_layout(params=None):
