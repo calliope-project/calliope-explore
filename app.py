@@ -119,12 +119,12 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(
             dbc.NavLink(
-                [html.I(className="bi-box-arrow-right"), " See the paper"], href="#"
+                [html.I(className="bi-box-arrow-right"), " See the paper"], href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4012180"
             )
         ),
         dbc.NavItem(
             dbc.NavLink(
-                [html.I(className="bi-download"), " Download the data"], href="#"
+                [html.I(className="bi-download"), " Download the data"], href="https://zenodo.org/record/5772658#.YisVCujMKUk"
             )
         ),
     ],
