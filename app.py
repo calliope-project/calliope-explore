@@ -52,14 +52,14 @@ COLS = {
         help_text="Degree of inequality of spatial distribution of industry"
         " synthetic fuel production relative to industry fuel demand across all model regions,"
         " measured by the Gini coefficient of regional over-production."
-        " Scaled relative to its maximum value (0.63 – 0.93)",
+        " Scaled relative to its maximum value (range 0.63 – 0.93)",
     ),
     "ev": dict(
         label="EV as flexibility",
         col="EV as flexibility",
         help_text="Pearson correlation between timeseries of electric vehicle"
         " charging against that of primary electricity supply."
-        " Scaled relative to its maximum value (0.52 – 0.92)",
+        " Scaled relative to its maximum value (range 0.52 – 0.92)",
     ),
     "heat": dict(
         label="Heat electrification",
