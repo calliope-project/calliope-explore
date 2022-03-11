@@ -82,7 +82,7 @@ tbody tr th {
     color: #0d6efd;
 }
 
-#help p {
+#help p, #help ol {
     color: #686868;
 }
 
