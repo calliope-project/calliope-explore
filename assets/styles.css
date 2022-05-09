@@ -57,18 +57,18 @@ body {
 }
 
 #overview-help-1 {
-    top: 10%;
-    left: 10%;
+    top: 3.5%;
+    left: 34%;
 }
 
 #overview-help-2 {
-    top: 10%;
-    left: 38%;
+    top: 3.5%;
+    left: 63%;
 }
 
 #overview-help-3 {
-    top: 10%;
-    left: 72%;
+    top: 3.5%;
+    left: 93%;
 }
 
 #slider-storage .rc-slider-track, #slider-storage .rc-slider-handle, #slider-storage .rc-slider-dot-active {background-color: #0440fe; border: none;}
