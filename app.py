@@ -253,6 +253,11 @@ HELP_TEXT = [
             ),
         ]
     ),
+    html.P("Note: This application is still under development"),
+    html.A(
+        "Feedback and suggestions are welcome!",
+        href="https://github.com/sjpfenninger/calliope-explore/issues",
+    ),
 ]
 
 
@@ -262,29 +267,26 @@ OVERVIEW_HELP_2 = "Annual regional net electricity import and high synthetic fue
 
 OVERVIEW_HELP_3 = "Electricity grid transmission expansion beyond existing or planned capacities between regions. The title states the total line capacity added across Europe above the baseline capacities. Light grey lines depict regions connected by transmission lines that are not expanded. Where transmission expansion occurs, lines are shown in blue, with increasing thickness indicating increasing transmission expansion. Two values in the legend mapping expansion to line thickness refer to the mean and maximum expansion of any one line of all those that are expanded."
 
-
-help_hover_div = html.Div(
-    [
-        html.I(className="bi-question-circle overview-help", id="overview-help-1"),
-        dbc.Popover(
-            dbc.PopoverBody(OVERVIEW_HELP_1),
-            target="overview-help-1",
-            trigger="hover",
-        ),
-        html.I(className="bi-question-circle overview-help", id="overview-help-2"),
-        dbc.Popover(
-            dbc.PopoverBody(OVERVIEW_HELP_2),
-            target="overview-help-2",
-            trigger="hover",
-        ),
-        html.I(className="bi-question-circle overview-help", id="overview-help-3"),
-        dbc.Popover(
-            dbc.PopoverBody(OVERVIEW_HELP_3),
-            target="overview-help-3",
-            trigger="hover",
-        ),
-    ]
-)
+overview_help_div_content = [
+    html.I(className="bi-question-circle overview-help", id="overview-help-1"),
+    dbc.Popover(
+        dbc.PopoverBody(OVERVIEW_HELP_1),
+        target="overview-help-1",
+        trigger="hover",
+    ),
+    html.I(className="bi-question-circle overview-help", id="overview-help-2"),
+    dbc.Popover(
+        dbc.PopoverBody(OVERVIEW_HELP_2),
+        target="overview-help-2",
+        trigger="hover",
+    ),
+    html.I(className="bi-question-circle overview-help", id="overview-help-3"),
+    dbc.Popover(
+        dbc.PopoverBody(OVERVIEW_HELP_3),
+        target="overview-help-3",
+        trigger="hover",
+    ),
+]
 
 
 def page_layout(params=None):
@@ -302,7 +304,10 @@ def page_layout(params=None):
             [
                 dbc.Tab(
                     html.Div(
-                        [html.Img(id="overview-image"), help_hover_div],
+                        [
+                            html.Img(id="overview-image"),
+                            html.Div(id="overview-help-div"),
+                        ],
                         className="relcontainer",
                     ),
                     label="Overview",
@@ -379,11 +384,22 @@ def page_layout(params=None):
     Output("overview-image", "src"),
     Input("spore-id", "data"),
 )
-def update_tabs(spore_id):
+def update_overview_image(spore_id):
     if spore_id is None:
         return "assets/img/empty.jpg"
     else:
         return f"assets/img/{spore_id}.jpg"
+
+
+@app.callback(
+    Output("overview-help-div", "children"),
+    Input("spore-id", "data"),
+)
+def update_overview_help_div(spore_id):
+    if spore_id is None:
+        return ""
+    else:
+        return overview_help_div_content
 
 
 @app.callback(
