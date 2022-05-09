@@ -1,5 +1,9 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
 
+body {
+    font-family: "Avenir Next", "Avenir", Helvetica, Arial, sans-serif;
+}
+
 .sporesbar {
     margin-bottom: 20px;
 }
@@ -33,7 +37,29 @@
     color: #ffffff;
 }
 
+.relcontainer {position: relative;}
+
 #overview-image {max-width: 100%;}
+
+.overview-help {
+    position: absolute;
+    font-size: 1.2em;
+}
+
+#overview-help-1 {
+    top: 10%;
+    left: 10%;
+}
+
+#overview-help-2 {
+    top: 10%;
+    left: 38%;
+}
+
+#overview-help-3 {
+    top: 10%;
+    left: 72%;
+}
 
 #slider-storage .rc-slider-track, #slider-storage .rc-slider-handle, #slider-storage .rc-slider-dot-active {background-color: #0440fe; border: none;}
 #slider-curtailment .rc-slider-track, #slider-curtailment .rc-slider-handle, #slider-curtailment .rc-slider-dot-active {background-color: #ff7c02; border: none;}

@@ -157,7 +157,7 @@ def row_label(params, label, id, col, help_text, default_marks=False):
             dbc.Col(
                 [
                     dbc.Label(
-                        [f"{label} ", html.I(className="bi-info-circle")],
+                        [f"{label} ", html.I(className="bi-question-circle")],
                         id=f"tgt-{id}",
                     ),
                     dbc.Popover(
@@ -238,9 +238,47 @@ HELP_TEXT = [
                 " Click on each of the SPORES in the plot to see it visualised on maps in the 'Overview' panel."
                 " You can also click on the 'Summary data' panel for quantitative metrics. For further details on the map contents, you can refer to the paper."
             ),
+            html.Li(
+                [
+                    "Different parts of the user interface use the ",
+                    html.I(className="bi-question-circle"),
+                    " icon to indicate that you can hover for further help.",
+                ],
+            ),
         ]
     ),
 ]
+
+
+OVERVIEW_HELP_1 = "Spatial distribution of onshore wind, offshore wind, and PV supply (right) and total primary energy supply across all regions (left). Capacities are shown for 29 zones which are aggregated from the 98 model regions to give comparable land area. Zonal supply is only shown when the sum of supply in that zone is greater than 6% of maximum supply from one technology in any region, making it visually easier to see the major supply hubs. Cyprus is not shown, but its data is included in the same zone as Greece in the maps. Biofuels, waste, hydro, and nuclear electricity supply are not shown on the maps."
+
+OVERVIEW_HELP_2 = "Annual regional net electricity import and high synthetic fuel producing regions. Data is shown at the resolution of the 98 model regions. For each region, annual net electricity import is the sum of all electricity imported from connected regions over the year minus electricity exported to connected regions over the year. A positive net import indicates a region imports more electricity than it exports, while a negative net imports indicates more exports than imports. High synthetic fuel-producing regions are those producing above 5% of European total hydrogen. Since hydrogen cannot be transported between regions in our models, nor can it be directly consumed to meet service demands, high hydrogen production is equivalent to high synthetic fuel production."
+
+OVERVIEW_HELP_3 = "Electricity grid transmission expansion beyond existing or planned capacities between regions. The title states the total line capacity added across Europe above the baseline capacities. Light grey lines depict regions connected by transmission lines that are not expanded. Where transmission expansion occurs, lines are shown in blue, with increasing thickness indicating increasing transmission expansion. Two values in the legend mapping expansion to line thickness refer to the mean and maximum expansion of any one line of all those that are expanded."
+
+
+help_hover_div = html.Div(
+    [
+        html.I(className="bi-question-circle overview-help", id="overview-help-1"),
+        dbc.Popover(
+            dbc.PopoverBody(OVERVIEW_HELP_1),
+            target="overview-help-1",
+            trigger="hover",
+        ),
+        html.I(className="bi-question-circle overview-help", id="overview-help-2"),
+        dbc.Popover(
+            dbc.PopoverBody(OVERVIEW_HELP_2),
+            target="overview-help-2",
+            trigger="hover",
+        ),
+        html.I(className="bi-question-circle overview-help", id="overview-help-3"),
+        dbc.Popover(
+            dbc.PopoverBody(OVERVIEW_HELP_3),
+            target="overview-help-3",
+            trigger="hover",
+        ),
+    ]
+)
 
 
 def page_layout(params=None):
@@ -257,7 +295,10 @@ def page_layout(params=None):
         dbc.Tabs(
             [
                 dbc.Tab(
-                    html.Img(id="overview-image"),
+                    html.Div(
+                        [html.Img(id="overview-image"), help_hover_div],
+                        className="relcontainer",
+                    ),
                     label="Overview",
                     tab_id="overview",
                 ),
@@ -293,6 +334,7 @@ def page_layout(params=None):
                         ],
                         align="top",
                     ),
+                    dbc.Row([html.Div("foobar")]),
                 ],
                 class_name="sporescontainer",
             ),
