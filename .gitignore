@@ -1,4 +1,3 @@
 assets/img/*
 !assets/img/.gitkeep
-docs
-config
+Makefile
