@@ -199,11 +199,13 @@ def controls(params):
                             outline=True,
                         ),
                         dbc.Button(
-                            "Deselect SPORE",
+                            "Deselect result",
                             color="primary",
                             id="reset-spore",
                             outline=True,
                         ),
+                        html.Span("Results: "),
+                        html.Span(id="num-results"),
                     ]
                 ),
                 class_name="buttons",
@@ -444,6 +446,14 @@ def update_spore_id(scatter_clickdata, reset_n_clicks, old_spore_id):
     # # we return the URL-persisted spore id
     # except TypeError:
     #     return old_spore_id
+
+
+@app.callback(
+    Output("num-results", "children"),
+    Input("spores-scatter", "figure"),
+)
+def update_num_results(figure):
+    return len(figure["data"][0]["y"])
 
 
 @app.callback(
