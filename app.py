@@ -96,6 +96,8 @@ COMPONENT_IDS = {
 
 server = flask.Flask(__name__)
 
+TITLE = "Carbon-neutral European energy systems"
+
 app = Dash(
     __name__,
     server=server,
@@ -104,7 +106,7 @@ app = Dash(
     # This is needed because we construct the layout programmatically; at load time
     # of the app, many of the ids targeted by callbacks do not yet exist
     suppress_callback_exceptions=True,
-    title="Energy system explorer",
+    title=TITLE,
 )
 
 
@@ -114,7 +116,7 @@ url_bar_and_content_div = html.Div(
 
 
 navbar = dbc.NavbarSimple(
-    brand="Energy system explorer",
+    brand=TITLE,
     # brand_href="#",
     color="primary",
     dark=True,
