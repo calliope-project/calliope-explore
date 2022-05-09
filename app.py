@@ -62,12 +62,12 @@ COLS = {
         " Scaled relative to its maximum value (range 0.52 – 0.92)",
     ),
     "heat": dict(
-        label="Heat electrification",
+        label="Heat electr.",
         col="Heat electrification",
         help_text="Percentage of heat demand met by electricity-consuming, heat-producing technologies",
     ),
     "transport": dict(
-        label="Transport electrification",
+        label="Transport electr.",
         col="Transport electrification",
         help_text="Percentage of road passenger and freight transport demand met by electric vehicles",
     ),
@@ -100,6 +100,7 @@ app = Dash(
     __name__,
     server=server,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     # This is needed because we construct the layout programmatically; at load time
     # of the app, many of the ids targeted by callbacks do not yet exist
     suppress_callback_exceptions=True,
@@ -171,9 +172,14 @@ def row_label(params, label, id, col, help_text, default_marks=False):
             ),
             dbc.Col(
                 url_helpers.apply_default_value(params)(dcc.RangeSlider)(
-                    min=0, max=1, value=[min_, max_], id=id, **kwargs
+                    min=0,
+                    max=1,
+                    value=[min_, max_],
+                    id=id,
+                    className="slider",
+                    **kwargs,
                 ),
-                class_name="slider",
+                class_name="slider-col",
             ),
         ],
         class_name="slider-group",
@@ -334,9 +340,34 @@ def page_layout(params=None):
                         ],
                         align="top",
                     ),
-                    dbc.Row([html.Div("foobar")]),
                 ],
                 class_name="sporescontainer",
+            ),
+            html.Div(
+                dbc.Container(
+                    dbc.Row(
+                        dbc.Col(
+                            [
+                                html.Div(
+                                    [
+                                        html.A(
+                                            "Built with Plotly Dash",
+                                            href="https://dash.plotly.com/",
+                                        ),
+                                        " - ",
+                                        html.A(
+                                            "Source code on GitHub",
+                                            href="https://github.com/sjpfenninger/calliope-explore",
+                                        ),
+                                    ],
+                                    id="footer-content",
+                                )
+                            ]
+                        )
+                    ),
+                ),
+                id="footer-container",
+                className="container-fluid",
             ),
         ]
     )
@@ -448,13 +479,14 @@ def update_figure(
 
     fig = px.strip(
         df_spores_filtered,
-        x="variable",
-        y="value",
+        y="variable",
+        x="value",
         custom_data=["id"],
         hover_name="id",
         color="variable",
         hover_data={c: False for c in df_spores_filtered.columns},
         template="plotly_white",
+        orientation="h",
         height=350,
         color_discrete_sequence=[
             "#0440fe",
@@ -473,7 +505,8 @@ def update_figure(
         showlegend=False,
         margin=dict(l=0, r=0, t=0, b=0),
         transition_duration=500,
-        xaxis=dict(showticklabels=False),
+        yaxis=dict(showticklabels=False, title=None),
+        xaxis=dict(title=None),
     )
 
     return fig

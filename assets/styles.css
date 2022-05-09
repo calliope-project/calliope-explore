@@ -1,7 +1,7 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
 
 body {
-    font-family: "Avenir Next", "Avenir", Helvetica, Arial, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
 .sporesbar {
@@ -22,15 +22,25 @@ body {
 }
 
 .slider-group {
-    /* padding-bottom: 5px; */
+    margin-bottom: 10px;
+}
+
+.slider {
+    margin-top: 2px;
+    padding: 0px 25px !important;
 }
 
 .slider-label {
     font-size: 0.8em;
+    text-align: right;
 }
 
 .slider-label label {
-    margin-top: -5px;
+    margin: 0;
+}
+
+#spores-scatter {
+    margin-top: 22px;
 }
 
 .navbar-dark .navbar-nav .nav-link {
@@ -114,4 +124,28 @@ tbody tr th {
 
 #help summary + p {
     padding-top: 20px;
+}
+
+#footer-container {
+    /* width: 100%;
+    margin: 0; */
+    /* border-top: 1px solid grey; */
+    font-size: 0.9em;
+    color: #686868;
+    /* background-color:#e0e0e0; */
+}
+
+#footer-content {
+    text-align: right;
+    padding: 30px 0;
+}
+
+@media only screen and (max-width: 576px) {
+    #spores-scatter {
+        margin-top: 70px;
+    }
+
+    .tabbedcontainer {
+        margin-top: 30px;
+    }
 }
