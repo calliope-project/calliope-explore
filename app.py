@@ -2,6 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_dangerously_set_inner_html
 import flask
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, dcc, html
@@ -11,6 +12,8 @@ import url_helpers
 
 
 df_spores = pd.read_csv("./data/data.csv", index_col=0)
+# The dummy column is used to make space for the "rest axes" button
+df_spores["dummy"] = 0
 df_units = pd.read_csv("./data/units.csv", index_col=0)
 
 COLS = {
@@ -292,6 +295,21 @@ overview_help_div_content = [
     ),
 ]
 
+PLOT_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False,
+    "modeBarButtonsToRemove": [
+        "pan",
+        "zoom",
+        "select",
+        "zoomIn",
+        "zoomOut",
+        "autoScale",
+        "lasso2d",
+        "toImage",
+    ],
+}
+
 
 def page_layout(params=None):
     params = params or {}
@@ -340,7 +358,9 @@ def page_layout(params=None):
                                 html.Div(
                                     [
                                         controls(params=params),
-                                        dcc.Graph(id="spores-scatter"),
+                                        dcc.Graph(
+                                            id="spores-scatter", config=PLOT_CONFIG
+                                        ),
                                     ]
                                 ),
                                 md=4,
@@ -502,7 +522,7 @@ def update_figure(
     ]
 
     df_spores_filtered = pd.melt(
-        df_spores_filtered.loc[:, COL_NAMES], ignore_index=False
+        df_spores_filtered.loc[:, ["dummy"] + COL_NAMES], ignore_index=False
     ).reset_index(drop=False)
 
     fig = px.strip(
@@ -517,6 +537,7 @@ def update_figure(
         orientation="h",
         height=350,
         color_discrete_sequence=[
+            "#ffffff",
             "#0440fe",
             "#ff7c02",
             "#32ce4d",
@@ -533,7 +554,7 @@ def update_figure(
         showlegend=False,
         margin=dict(l=0, r=0, t=0, b=0),
         transition_duration=500,
-        yaxis=dict(showticklabels=False, title=None),
+        yaxis=dict(showticklabels=False, title=None, fixedrange=True),
         xaxis=dict(title=None),
     )
 
