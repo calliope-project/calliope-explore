@@ -2,7 +2,7 @@
 
 An interactive web application to show results from a large number of [Calliope](https://github.com/calliope-project/calliope) model runs.
 
-Work in progress. [Feedback is welcome!](https://github.com/sjpfenninger/calliope-explore/issues)
+Work in progress. [Feedback is welcome!](https://github.com/calliope-project/calliope-explore/issues)
 
 ## Development
 

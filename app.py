@@ -10,8 +10,8 @@ from dash.exceptions import PreventUpdate
 import url_helpers
 
 
-df_spores = pd.read_csv("./spores_data.csv", index_col=0)
-df_units = pd.read_csv("./units.csv", index_col=0)
+df_spores = pd.read_csv("./data/data.csv", index_col=0)
+df_units = pd.read_csv("./data/units.csv", index_col=0)
 
 COLS = {
     "storage": dict(
@@ -130,7 +130,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(
             dbc.NavLink(
                 [html.I(className="bi-download"), " Download the data"],
-                href="https://zenodo.org/record/5772658",
+                href="https://zenodo.org/record/6368833",
             )
         ),
     ],
@@ -260,7 +260,7 @@ HELP_TEXT = [
     html.P("Note: This application is still under development"),
     html.A(
         "Feedback and suggestions are welcome!",
-        href="https://github.com/sjpfenninger/calliope-explore/issues",
+        href="https://github.com/calliope-project/calliope-explore/issues",
     ),
 ]
 
@@ -366,7 +366,7 @@ def page_layout(params=None):
                                         " - ",
                                         html.A(
                                             "Source code on GitHub",
-                                            href="https://github.com/sjpfenninger/calliope-explore",
+                                            href="https://github.com/calliope-project/calliope-explore",
                                         ),
                                     ],
                                     id="footer-content",
