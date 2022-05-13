@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, dcc, html
 from dash.exceptions import PreventUpdate
+import numpy as np
 
 import url_helpers
 
@@ -23,6 +24,7 @@ COLS = {
         help_text="Total capacity of all storage technologies to discharge energy in any given hour,"
         " including low temperature heat,hydrogen and electricity. Scaled relative to its maximum value"
         "(range 0.08 – 11 TW)",
+        color="#0440fe"
     ),
     "curtailment": dict(
         label="Curtailment",
@@ -30,17 +32,20 @@ COLS = {
         help_text="Percentage of maximum available renewable electricity production"
         " from wind and solar photovoltaic technologies that is curtailed"
         " Scaled relative to its maximum value (range 0.1 – 6 %)",
+        color="#ff7c02"
     ),
     "biofuel": dict(
         label="Biofuel utilisation",
         col="Biofuel utilisation",
         help_text="Percentage of available residual biofuels that are consumed",
+        color="#32ce4d"
     ),
     "import": dict(
         label="National import",
         col="Average national import",
         help_text="Average annual import of electricity across all countries in the study area."
         " Scaled relative to its maximum value (range 4 – 73 TWh)",
+        color="#e9111c"
     ),
     "elec-gini": dict(
         label="Electricity gini",
@@ -48,6 +53,7 @@ COLS = {
         help_text="Degree of inequality of spatial distribution of electricity across all model regions,"
         " measured by the Gini coefficient of regional electricity production."
         " Scaled relative to its maximum value (range 0.53 – 0.74)",
+        color="#933ae2"
     ),
     "fuel-gini": dict(
         label="Fuel autarky",
@@ -56,6 +62,7 @@ COLS = {
         " synthetic fuel production relative to industry fuel demand across all model regions,"
         " measured by the Gini coefficient of regional over-production."
         " Scaled relative to its maximum value (range 0.63 – 0.93)",
+        color="#7f3901"
     ),
     "ev": dict(
         label="EV as flexibility",
@@ -63,16 +70,19 @@ COLS = {
         help_text="Pearson correlation between timeseries of electric vehicle"
         " charging against that of primary electricity supply."
         " Scaled relative to its maximum value (range 0.52 – 0.92)",
+        color="#f69adb"
     ),
     "heat": dict(
         label="Heat electr.",
         col="Heat electrification",
         help_text="Percentage of heat demand met by electricity-consuming, heat-producing technologies",
+        color="#ffd85b"
     ),
     "transport": dict(
         label="Transport electr.",
         col="Transport electrification",
         help_text="Percentage of road passenger and freight transport demand met by electric vehicles",
+        color="#58e5fe"
     ),
 }
 
@@ -151,6 +161,24 @@ def row_label_from_id(params, id_, default_marks=False):
     )
 
 
+def row_label_from_id2(params, id_, default_marks=False):
+    return dbc.Row(
+        [
+            dbc.Col(
+                url_helpers.apply_default_value(params)(dcc.Graph)(
+                    id=id_,
+                    config={
+                        'displayModeBar': False
+                    }
+                ),
+                class_name="slider-col",
+            ),
+        ],
+        class_name="slider-group",
+    )
+
+
+
 def row_label(params, label, id, col, help_text, default_marks=False):
     if default_marks:
         kwargs = {}
@@ -224,6 +252,21 @@ def controls(params):
             row_label_from_id(params=params, id_="ev"),
             row_label_from_id(params=params, id_="heat"),
             row_label_from_id(params=params, id_="transport", default_marks=True),
+        ]
+    )
+
+def controls2(params):
+    return html.Div(
+        [
+            row_label_from_id2(params=params, id_="storage"),
+            row_label_from_id2(params=params, id_="curtailment"),
+            row_label_from_id2(params=params, id_="biofuel"),
+            row_label_from_id2(params=params, id_="import"),
+            row_label_from_id2(params=params, id_="elec-gini"),
+            row_label_from_id2(params=params, id_="fuel-gini"),
+            row_label_from_id2(params=params, id_="ev"),
+            row_label_from_id2(params=params, id_="heat"),
+            row_label_from_id2(params=params, id_="transport", default_marks=True),
         ]
     )
 
@@ -358,9 +401,8 @@ def page_layout(params=None):
                                 html.Div(
                                     [
                                         controls(params=params),
-                                        dcc.Graph(
-                                            id="spores-scatter", config=PLOT_CONFIG
-                                        ),
+                                        controls2(params=params),
+                                        dcc.Graph(id="spores-scatter", config=PLOT_CONFIG),
                                     ]
                                 ),
                                 md=4,
@@ -368,7 +410,7 @@ def page_layout(params=None):
                             dbc.Col(results, md=8, class_name="tabbedcontainer"),
                         ],
                         align="top",
-                    ),
+                    )
                 ],
                 class_name="sporescontainer",
             ),
@@ -560,6 +602,82 @@ def update_figure(
 
     return fig
 
+
+def get_figure(df, col, selectedpoints, selectedpoints_local):
+    colname = COLS[col]["col"]
+    if selectedpoints_local and selectedpoints_local['range']:
+        ranges = selectedpoints_local['range']
+        selection_bounds = {
+            'x0': ranges['x'][0], 'x1': ranges['x'][1],
+            'y0': 0, 'y1': 1
+        }
+    else:
+        selection_bounds = {
+            'x0': np.min(df[colname]), 'x1': np.max(df[colname]),
+            'y0': 0, 'y1': 1
+        }
+
+    # set which points are selected with the `selectedpoints` property
+    # and style those points with the `selected` and `unselected`
+    # attribute. see
+    # https://medium.com/@plotlygraphs/notes-from-the-latest-plotly-js-release-b035a5b43e21
+    # for an explanation
+    fig = px.strip(df, x=colname,
+        custom_data=["id"],  # doesn't seem to be working to show the spore ID on hover.
+        hover_name="id",
+        hover_data={c: False for c in df.columns},
+        template="plotly_white",
+        orientation="h",
+        height=350/9,
+        color_discrete_sequence=[COLS[col]["color"]],)
+
+    fig.update_traces(
+        selectedpoints=selectedpoints,
+        customdata=df.index,
+        marker={'color': COLS[col]["color"], 'opacity': 0.75, 'size': 5},
+        unselected={'marker': { 'opacity': 0.1 , 'color': "grey", 'size': 2}}, # could make unselected ones entirely invisible, but here we jsut make them very small and grey
+    )
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(l=0, r=0, t=0, b=0),
+        transition_duration=500,
+        yaxis=dict(showticklabels=False, title=None),
+        xaxis=dict(title=None),
+        dragmode='select',
+        hovermode=False,
+        selectdirection="h",
+        xaxis_range=[0, 1]
+    )
+
+    fig.add_shape(dict({'type': 'rect',
+                        'line': { 'width': 1, 'dash': 'dot', 'color': 'darkgrey' } },
+                       **selection_bounds))
+    return fig
+
+
+@app.callback(
+    *(Output(col, 'figure') for col in COLS.keys()),
+    *(Input(col, 'selectedData') for col in COLS.keys())
+)
+def callback(s1, s2, s3, s4, s5, s6, s7, s8, s9):
+    _df = df_spores.reset_index()
+    selectedpoints = _df.index
+    for selected_data in [s1, s2, s3, s4, s5, s6, s7, s8, s9]:
+        if selected_data and selected_data['points']:
+            selectedpoints = np.intersect1d(selectedpoints,
+                [p['customdata'] for p in selected_data['points']])
+
+    return [
+        get_figure(_df, "storage", selectedpoints, s1),
+        get_figure(_df, "curtailment", selectedpoints, s2),
+        get_figure(_df, "biofuel", selectedpoints, s3),
+        get_figure(_df, "import", selectedpoints, s4),
+        get_figure(_df, "elec-gini", selectedpoints, s5),
+        get_figure(_df, "fuel-gini", selectedpoints, s6),
+        get_figure(_df, "ev", selectedpoints, s7),
+        get_figure(_df, "heat", selectedpoints, s8),
+        get_figure(_df, "transport", selectedpoints, s9),
+    ]
 
 def app_layout():
     if flask.has_request_context():
