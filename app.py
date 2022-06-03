@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, dcc, html
 from dash.exceptions import PreventUpdate
+import json
 
 import url_helpers
 
@@ -15,6 +16,12 @@ df_spores = pd.read_csv("./data/data.csv", index_col=0)
 # The dummy column is used to make space for the "rest axes" button
 df_spores["dummy"] = 0
 df_units = pd.read_csv("./data/units.csv", index_col=0)
+
+try:
+    with open("./external_scripts.json", "r") as f:
+        EXTERNAL_SCRIPTS = json.load(f)
+except FileNotFoundError:
+    EXTERNAL_SCRIPTS = {}
 
 COLS = {
     "storage": dict(
@@ -105,6 +112,7 @@ app = Dash(
     __name__,
     server=server,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_scripts=EXTERNAL_SCRIPTS,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     # This is needed because we construct the layout programmatically; at load time
     # of the app, many of the ids targeted by callbacks do not yet exist
@@ -436,6 +444,7 @@ def update_summary(spore_id):
     else:
         df_ = pd.concat([df_spores.loc[spore_id, :], df_units], axis=1)
         df_.columns = ["Indicator", "Unit"]
+        df_ = df_.dropna()  # Drop if indicator or unit are NaN
         return dash_dangerously_set_inner_html.DangerouslySetInnerHTML(
             df_.to_html(float_format=lambda x: "{:.2f}".format(x))
         )
